@@ -29,13 +29,13 @@ public class ProductCreateEventHandler {
     @KafkaHandler
     public void handle(ProductCreatedEvent productCreatedEvent) {
 //        if (true) throw new NonRetryableException("Non retryable exception");
-        LOGGER.info("received event: {}", productCreatedEvent.getTitle());
+        LOGGER.info("received event: {}, productId:{}", productCreatedEvent.getTitle(), productCreatedEvent.getProductId());
 
         String url = "http://localhost:8090/response/200";
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
             if (response.getStatusCode().value() == HttpStatus.OK.value()) {
-                LOGGER.info("Received response: [}", response.getBody());
+                LOGGER.info("Received response: {}", response.getBody());
             }
         } catch (ResourceAccessException e) {
             LOGGER.error(e.getMessage());
