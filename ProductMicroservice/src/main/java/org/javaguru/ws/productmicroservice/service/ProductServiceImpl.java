@@ -1,6 +1,7 @@
 package org.javaguru.ws.productmicroservice.service;
 
 import by.javaguru.ws.core.ProductCreatedEvent;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.javaguru.ws.productmicroservice.service.dto.CreateProductDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +32,17 @@ public class ProductServiceImpl implements ProductService {
                 createProductDto.getTitle(),
                 createProductDto.getPrice(),
                 createProductDto.getQuantity());
+
+        ProducerRecord<String, ProductCreatedEvent> record = new ProducerRecord<>(
+                "product-created-events-topic",
+                productId,
+                productCreatedEvent
+        );
+
+        record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
+
         SendResult<String, ProductCreatedEvent> result = kafkaTemplate
-                .send("product-created-events-topic", productId, productCreatedEvent).get();
+                .send(record).get();
 
         LOGGER.info("Topic: {}", result.getRecordMetadata().topic());
         LOGGER.info("Partition: {}", result.getRecordMetadata().partition());
